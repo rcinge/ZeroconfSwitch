@@ -1,0 +1,87 @@
+trigger:
+- main
+- rel/*
+
+pr:
+- main
+- rel/*
+
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    pool:
+      vmImage: windows-latest
+
+    variables: 
+      BuildConfiguration: Release
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+    steps:
+    - task: UseDotNet@2
+      inputs:
+        version: 5.x
+
+    - task: DotNetCoreCLI@2  
+      inputs:
+        command: custom
+        custom: tool
+        arguments: install --tool-path . nbgv
+      displayName: Install NBGV tool
+
+    - script: nbgv cloud
+      displayName: Set Version
+
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: pack
+        packagesToPack: ZeroconfSwitch/ZeroconfSwitch.csproj
+        configuration: $(BuildConfiguration)
+        packDirectory: $(Build.ArtifactStagingDirectory)\Packages    
+      displayName: Build / Pack
+
+    - publish: $(Build.ArtifactStagingDirectory)\Packages
+      displayName: Publish build packages
+      artifact: BuildPackages
+
+    - publish: config
+      displayName: Publish signing config
+      artifact: config
+
+- stage: CodeSign
+  condition: and(succeeded('Build'), not(eq(variables['build.reason'], 'PullRequest')))
+  jobs:
+  - deployment: CodeSign
+    displayName: Code Signing
+    pool:
+      vmImage: windows-latest    
+    environment: Code Sign - CI
+    variables:
+    - group: Sign Client Credentials
+    strategy:
+      runOnce:
+        deploy:
+          steps: 
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: custom
+              custom: tool
+              arguments: install --tool-path . SignClient
+            displayName: Install SignTool tool
+
+          - pwsh: |
+              .\SignClient "Sign" `
+              --baseDirectory "$(Pipeline.Workspace)\BuildPackages" `
+              --input "**/*.nupkg" `
+              --config "$(Pipeline.Workspace)\config\signclient.json" `
+              --user "$(SignClientUser)" `
+              --secret "$(SignClientSecret)" `
+              --name "Zeroconf" `
+              --description "ZeroconfSwitch" `
+              --descriptionUrl "https://github.com/rcinge/ZeroconfSwitch"
+            displayName: Sign packages
+              
+          - publish: $(Pipeline.Workspace)/BuildPackages
+            displayName: Publish Signed Packages
+            artifact: SignedPackages

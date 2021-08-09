@@ -1,0 +1,33 @@
+<Project Sdk="MSBuild.Sdk.Extras">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net46;xamarinios10</TargetFrameworks>
+    <Authors>Claire Novotny,Richard Inge</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/rcinge/ZeroconfSwitch</PackageProjectUrl>
+    <Description>Wrapper for Zeroconf https://github/novotnyllc/Zeroconf to make it functional in Xamarin iOS 14.5+</Description>
+    <Copyright>© Claire Novotny 2016-2021</Copyright>
+    <PackageTags>zeroconfswitch;zeroconf;bonjour;mdns;service;discovery;xamarin;netstandard;universal</PackageTags>
+    <Product>ZeroconfSwitch</Product>
+    <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
+    <CodeAnalysisRuleSet>ZeroconfSwitch.ruleset</CodeAnalysisRuleSet>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\ZeroconfSwitch.rd.xml" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.231" PrivateAssets="all" />
+    <PackageReference Include="System.Reactive" Version="4.4.1" />
+    <PackageReference Include="Zeroconf" Version="3.4.2" />
+  </ItemGroup>
+  
+  <Target Name="AddCommitHashToAssemblyAttributes" BeforeTargets="GetAssemblyAttributes">
+    <ItemGroup>
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition=" '$(SourceRevisionId)' != '' ">
+        <_Parameter1>CommitHash</_Parameter1>
+        <_Parameter2>$(SourceRevisionId)</_Parameter2>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
+  
+</Project>
