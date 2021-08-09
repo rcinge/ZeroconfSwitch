@@ -1,7 +1,7 @@
 ZeroconfSwitch
 ==============
 
-# Wrapper for Zeroconf [Zeroconf](http://www.nuget.org/packages/Zeroconf) to make it functional in Xamarin with iOS >= 14.5
+# Wrapper for [Zeroconf](http://www.nuget.org/packages/Zeroconf) to make it functional in Xamarin with iOS >= 14.5
 
 iOS 14.5 and above introduced new restrictions on mDNS clients. Low-level socket-based clients (like Zeroconf) are blocked at the iOS library/system call level unless the program has a special com.apple.developer.networking.multicast entitlement
 
@@ -71,6 +71,7 @@ ZeroconfSwitch is only allowed to "browse" whatever is allowed in Info.plist.
 ## Unimplemented features
 
 ListenForAnnouncementsAsync()
+
 ResolverListener()
 
 ## Notes/Implementation Details
@@ -90,7 +91,9 @@ This project was created by copying the Zeroconf repository and then deleting th
 ## Hacking information
 
 ZeroconfSwitch.BonjourBrowser.cs is where the iOS API integration lives
+
 Sockaddr.cs contains the C# definitions of the BSD Socket API structures
+
 ZeroconfSwitchResolver.Async.cs contains the majority of the wrapper code (the #ifdef __IOS__ stuff)
 
 ## Credits
